@@ -19,6 +19,7 @@
 
 import torch
 import numpy as np
+from pathlib import Path
 
 from alpamayo_r1.models.alpamayo_r1 import AlpamayoR1
 from alpamayo_r1.load_physical_aiavdataset import load_physical_aiavdataset
@@ -32,7 +33,12 @@ data = load_physical_aiavdataset(clip_id, t0_us=5_100_000)
 print("Dataset loaded.")
 messages = helper.create_message(data["image_frames"].flatten(0, 1))
 
-model = AlpamayoR1.from_pretrained("nvidia/Alpamayo-R1-10B", dtype=torch.bfloat16).to("cuda")
+# model = AlpamayoR1.from_pretrained("nvidia/Alpamayo-R1-10B", dtype=torch.bfloat16).to("cuda")
+repo_root = Path(__file__).resolve().parents[2]
+local_model_path = repo_root / "models" / "Alpamayo-R1-10B"
+model = AlpamayoR1.from_pretrained(
+    str(local_model_path), dtype=torch.bfloat16, local_files_only=True
+).to("cuda")
 processor = helper.get_processor(model.tokenizer)
 
 inputs = processor.apply_chat_template(
